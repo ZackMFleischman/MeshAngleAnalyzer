@@ -1,0 +1,9 @@
+solid stl/z.stl
+facet normal -0.000000 0.000000 1
+  outer loop
+    vertex -1 -9 27
+    vertex 22 -48 27
+    vertex 55 -9 27
+  endloop
+endfacet
+endsolid stl/z.stl
