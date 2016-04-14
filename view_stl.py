@@ -7,8 +7,8 @@ figure = pyplot.figure()
 axes = mplot3d.Axes3D(figure)
 
 # Load the STL files and add the vectors to the plot
-# your_mesh = mesh.Mesh.from_file('stl/z.stl')
-your_mesh = mesh.Mesh.from_file('stl/heart.stl')
+# your_mesh = mesh.Mesh.from_file('meshes/z.stl')
+your_mesh = mesh.Mesh.from_file('meshes/heart.stl')
 plot_mesh = mplot3d.art3d.Poly3DCollection(your_mesh.vectors)
 plot_mesh.set_facecolor((0,1,1))
 plot_mesh.set_edgecolor((0,0,1))
