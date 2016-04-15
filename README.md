@@ -9,6 +9,7 @@ By default it will test for edges of 80 degrees or less.
 - matplotlib
 
 ## Usage
+```
 usage: find_sharp_edges.py [-h] [-t THRESHOLD] [-v] STL_FILE
 
 Analyze a manifold mesh to see if it has acute edges.
@@ -22,3 +23,4 @@ optional arguments:
                         The degree in angles that all edges must be greater
                         than.
   -v, --view            Show a plot of the model
+```
