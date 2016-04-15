@@ -10,8 +10,8 @@ from mpl_toolkits import mplot3d
 from matplotlib import pyplot
 
 parser = argparse.ArgumentParser(description='Analyze a manifold mesh to see if it has acute edges.')
-parser.add_argument('-t', '--threshold', type=int, default=80, help='The degree in angles that all edges must be greater than.')
-parser.add_argument('-v', '--view', action="store_true", help='Show a plot of the model')
+parser.add_argument('-t', '--threshold', type=int, default=80, help='The degree in angles that all edges must be greater than (default=80 degrees).')
+parser.add_argument('-v', '--view', action="store_true", help='Show a plot of the model instead of analyzing it.')
 parser.add_argument('STL_FILE')
 args = parser.parse_args()
 
@@ -120,6 +120,7 @@ if __name__ == "__main__":
     # Load the STL files and add the vectors to the plot
     # your_mesh = mesh.Mesh.from_file('meshes/z.stl')
     mesh = mesh.Mesh.from_file(STL_FILE)
-    analyze_edges(mesh)
     if VIEW_PLOT:
         plot_mesh(mesh)
+    else:
+        analyze_edges(mesh)
