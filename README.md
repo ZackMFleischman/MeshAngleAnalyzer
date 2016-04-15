@@ -21,6 +21,6 @@ optional arguments:
   -h, --help            show this help message and exit
   -t THRESHOLD, --threshold THRESHOLD
                         The degree in angles that all edges must be greater
-                        than.
-  -v, --view            Show a plot of the model
+                        than (default=80 degrees).
+  -v, --view            Show a plot of the model instead of analyzing it.
 ```
