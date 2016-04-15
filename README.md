@@ -24,3 +24,7 @@ optional arguments:
                         than (default=80 degrees).
   -v, --view            Show a plot of the model instead of analyzing it.
 ```
+
+## Visualization
+View a model with the **-v** flag set to see something like the following:
+![alt tag](https://github.com/zFleischman/MeshAngleAnalyzer/blob/master/heart_mesh.png)
