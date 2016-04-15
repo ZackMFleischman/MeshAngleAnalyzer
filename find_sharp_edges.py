@@ -1,6 +1,44 @@
+#!/usr/local/bin/python3
+
+import math
+import argparse
+
+import numpy as np
+
 from stl import mesh
 from mpl_toolkits import mplot3d
 from matplotlib import pyplot
+
+parser = argparse.ArgumentParser(description='Analyze a manifold mesh to see if it has acute edges.')
+parser.add_argument('-t', '--threshold', type=int, default=80, help='The degree in angles that all edges must be greater than.')
+parser.add_argument('-v', '--view', action="store_true", help='Show a plot of the model')
+parser.add_argument('STL_FILE')
+args = parser.parse_args()
+
+ANGLE_THRESHOLD = args.threshold
+VIEW_PLOT = args.view
+STL_FILE = args.STL_FILE
+
+def radians_to_degrees(rad):
+    return (rad*180.0)/math.pi
+
+def unit_vector(vector):
+    """ Returns the unit vector of the vector.  """
+    return vector / np.linalg.norm(vector)
+
+def angle_between(v1, v2):
+    """ Returns the angle in radians between vectors 'v1' and 'v2'::
+
+            >>> angle_between((1, 0, 0), (0, 1, 0))
+            1.5707963267948966
+            >>> angle_between((1, 0, 0), (1, 0, 0))
+            0.0
+            >>> angle_between((1, 0, 0), (-1, 0, 0))
+            3.141592653589793
+    """
+    v1_u = unit_vector(v1)
+    v2_u = unit_vector(v2)
+    return np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))
 
 def get_ordered_segment(v1, v2):
     if v1[0] < v2[0]:
@@ -43,10 +81,26 @@ def build_edge_hash(mesh):
 
 def analyze_edges(mesh):
     edge_hash = build_edge_hash(mesh)
+
     x = 1
-    for (key, value) in edge_hash.items():
-        print("{}: num triangles on edge: {}".format(x, len(value)))
+    too_sharp = False
+    for values in edge_hash.values():
+        n1 = values[0][1]
+        n2 = values[1][1]
+        angle_between_normals = radians_to_degrees(angle_between(n1, n2))
+        angle_of_edge = 180.0 - angle_between_normals
+        if angle_of_edge < ANGLE_THRESHOLD:
+            print ("{} - Angle: {} - Triangles: {}".format(x, angle_of_edge, values))
+            too_sharp = True
         x += 1
+
+    if too_sharp:
+        print("Shape failed! Edges are too sharp.")
+    else:
+        print("Shape passed! Edges aren't too sharp.")
+
+
+
 
 # Create a new plot
 figure = pyplot.figure()
@@ -54,7 +108,7 @@ axes = mplot3d.Axes3D(figure)
 
 # Load the STL files and add the vectors to the plot
 # your_mesh = mesh.Mesh.from_file('meshes/z.stl')
-mesh = mesh.Mesh.from_file('meshes/heart.stl')
+mesh = mesh.Mesh.from_file(STL_FILE)
 
 analyze_edges(mesh)
 
@@ -68,4 +122,5 @@ scale = mesh.points.flatten(-1)
 axes.auto_scale_xyz(scale, scale, scale)
 
 # Show the plot to the screen
-pyplot.show()
+if VIEW_PLOT:
+    pyplot.show()
