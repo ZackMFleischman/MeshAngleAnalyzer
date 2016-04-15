@@ -93,7 +93,7 @@ def analyze_edges(mesh):
             too_sharp = True
 
     if too_sharp:
-        print("Shape failed! Edges are too sharp. (Some are greater than {} degrees)".format(ANGLE_THRESHOLD))
+        print("Shape failed! Edges are too sharp. (Some are less than {} degrees)".format(ANGLE_THRESHOLD))
     else:
         print("Shape passed! Edges aren't too sharp. (All are greater than {} degrees)".format(ANGLE_THRESHOLD))
 
