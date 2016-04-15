@@ -82,7 +82,6 @@ def build_edge_hash(mesh):
 def analyze_edges(mesh):
     edge_hash = build_edge_hash(mesh)
 
-    x = 1
     too_sharp = False
     for values in edge_hash.values():
         n1 = values[0][1]
@@ -90,37 +89,37 @@ def analyze_edges(mesh):
         angle_between_normals = radians_to_degrees(angle_between(n1, n2))
         angle_of_edge = 180.0 - angle_between_normals
         if angle_of_edge < ANGLE_THRESHOLD:
-            print ("{} - Angle: {} - Triangles: {}".format(x, angle_of_edge, values))
+            print ("Angle greater than threshold({}): {} - Triangles: {}".format(ANGLE_THRESHOLD, angle_of_edge, values))
             too_sharp = True
-        x += 1
 
     if too_sharp:
-        print("Shape failed! Edges are too sharp.")
+        print("Shape failed! Edges are too sharp. (Some are greater than {} degrees)".format(ANGLE_THRESHOLD))
     else:
-        print("Shape passed! Edges aren't too sharp.")
+        print("Shape passed! Edges aren't too sharp. (All are greater than {} degrees)".format(ANGLE_THRESHOLD))
 
 
+def plot_mesh(mesh):
+    # Create a new plot
+    figure = pyplot.figure()
+    axes = mplot3d.Axes3D(figure)
 
+    mesh_collection = mplot3d.art3d.Poly3DCollection(mesh.vectors)
+    mesh_collection.set_facecolor((0,1,1))
+    mesh_collection.set_edgecolor((0,0,1))
+    axes.add_collection3d(mesh_collection)
 
-# Create a new plot
-figure = pyplot.figure()
-axes = mplot3d.Axes3D(figure)
+    # Auto scale to the mesh size
+    scale = mesh.points.flatten(-1)
+    axes.auto_scale_xyz(scale, scale, scale)
 
-# Load the STL files and add the vectors to the plot
-# your_mesh = mesh.Mesh.from_file('meshes/z.stl')
-mesh = mesh.Mesh.from_file(STL_FILE)
-
-analyze_edges(mesh)
-
-plot_mesh = mplot3d.art3d.Poly3DCollection(mesh.vectors)
-plot_mesh.set_facecolor((0,1,1))
-plot_mesh.set_edgecolor((0,0,1))
-axes.add_collection3d(plot_mesh)
-
-# Auto scale to the mesh size
-scale = mesh.points.flatten(-1)
-axes.auto_scale_xyz(scale, scale, scale)
-
-# Show the plot to the screen
-if VIEW_PLOT:
+    # Show the plot to the screen
     pyplot.show()
+
+
+if __name__ == "__main__":
+    # Load the STL files and add the vectors to the plot
+    # your_mesh = mesh.Mesh.from_file('meshes/z.stl')
+    mesh = mesh.Mesh.from_file(STL_FILE)
+    analyze_edges(mesh)
+    if VIEW_PLOT:
+        plot_mesh(mesh)
