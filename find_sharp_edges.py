@@ -89,7 +89,7 @@ def analyze_edges(mesh):
         angle_between_normals = radians_to_degrees(angle_between(n1, n2))
         angle_of_edge = 180.0 - angle_between_normals
         if angle_of_edge < ANGLE_THRESHOLD:
-            print ("Angle greater than threshold({}): {} - Triangles: {}".format(ANGLE_THRESHOLD, angle_of_edge, values))
+            print ("Angle less than threshold({}): {} - Triangles: {}".format(ANGLE_THRESHOLD, angle_of_edge, values))
             too_sharp = True
 
     if too_sharp:
