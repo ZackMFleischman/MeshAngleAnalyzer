@@ -90,12 +90,12 @@ def analyze_edges(mesh):
         angle_between_normals = radians_to_degrees(angle_between(n1, n2))
         angle_of_edge = 180.0 - angle_between_normals
         if angle_of_edge < ANGLE_THRESHOLD:
-            print ("{0:.2f} degree angle found! (Angle less than {1} degrees)  /  Triangles Indices: {2}, {3}".format(angle_of_edge, ANGLE_THRESHOLD, values[0][2], values[1][2]))
+            print ("{0:.2f} degree angle found! (Angle less than {1} degrees)  /  Triangle Indices: {2}, {3}".format(angle_of_edge, ANGLE_THRESHOLD, values[0][2], values[1][2]))
             num_bad_edges += 1
             bad_indices.append(values[0][2])
             bad_indices.append(values[1][2])
-    print("")
     if num_bad_edges > 0:
+        print("")
         print("ERROR: {} edges are too sharp! (Are less than {} degrees)".format(num_bad_edges, ANGLE_THRESHOLD))
     else:
         print("Shape passed! Edges aren't too sharp. (All are greater than {} degrees)".format(ANGLE_THRESHOLD))
@@ -156,4 +156,6 @@ if __name__ == "__main__":
         plot_mesh(mesh)
     else:
         bad_indices = analyze_edges(mesh)
-        plot_bad_edges(mesh, bad_indices)
+        # Only display the plot if the things too sharp.
+        if (len(bad_indices) > 0):
+            plot_bad_edges(mesh, bad_indices)
