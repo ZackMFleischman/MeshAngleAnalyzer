@@ -67,7 +67,7 @@ def build_edge_hash(mesh):
         AC = get_ordered_segment_tuple(mesh.points[i][0:3], mesh.points[i][6:9])
         BC = get_ordered_segment_tuple(mesh.points[i][3:6], mesh.points[i][6:9])
 
-        tri = (mesh.points[i], mesh.normals[i])
+        tri = (mesh.points[i], mesh.normals[i], i)
 
         edge_hash.setdefault(AB, []).append(tri)
         edge_hash.setdefault(AC, []).append(tri)
@@ -82,20 +82,24 @@ def build_edge_hash(mesh):
 def analyze_edges(mesh):
     edge_hash = build_edge_hash(mesh)
 
-    too_sharp = False
+    num_bad_edges = 0
+    bad_indices = []
     for values in edge_hash.values():
         n1 = values[0][1]
         n2 = values[1][1]
         angle_between_normals = radians_to_degrees(angle_between(n1, n2))
         angle_of_edge = 180.0 - angle_between_normals
         if angle_of_edge < ANGLE_THRESHOLD:
-            print ("Angle less than threshold({}): {} - Triangles: {}".format(ANGLE_THRESHOLD, angle_of_edge, values))
-            too_sharp = True
-
-    if too_sharp:
-        print("Shape failed! Edges are too sharp. (Some are less than {} degrees)".format(ANGLE_THRESHOLD))
+            print ("{0:.2f} degree angle found! (Angle less than {1} degrees)  /  Triangles Indices: {2}, {3}".format(angle_of_edge, ANGLE_THRESHOLD, values[0][2], values[1][2]))
+            num_bad_edges += 1
+            bad_indices.append(values[0][2])
+            bad_indices.append(values[1][2])
+    print("")
+    if num_bad_edges > 0:
+        print("ERROR: {} edges are too sharp! (Are less than {} degrees)".format(num_bad_edges, ANGLE_THRESHOLD))
     else:
         print("Shape passed! Edges aren't too sharp. (All are greater than {} degrees)".format(ANGLE_THRESHOLD))
+    return bad_indices
 
 
 def plot_mesh(mesh):
@@ -116,6 +120,34 @@ def plot_mesh(mesh):
     pyplot.show()
 
 
+def plot_bad_edges(mesh, bad_indices):
+    # Create a new plot
+    figure = pyplot.figure()
+    axes = mplot3d.Axes3D(figure)
+
+    good_ones = np.delete(mesh.vectors, bad_indices, 0)
+    bad_ones = []
+    for i in bad_indices:
+        bad_ones.append(mesh.vectors[i])
+    bad_ones = np.asarray(bad_ones)
+
+    mesh_collection_good = mplot3d.art3d.Poly3DCollection(good_ones)
+    mesh_collection_good.set_facecolor((0,1,1))
+    mesh_collection_good.set_edgecolor((0,0,1))
+    axes.add_collection3d(mesh_collection_good)
+
+    mesh_collection_bad = mplot3d.art3d.Poly3DCollection(bad_ones)
+    mesh_collection_bad.set_facecolor((1,1,0))
+    mesh_collection_bad.set_edgecolor((1,0,0))
+    axes.add_collection3d(mesh_collection_bad)
+
+    # Auto scale to the mesh size
+    scale = mesh.points.flatten(-1)
+    axes.auto_scale_xyz(scale, scale, scale)
+
+    # Show the plot to the screen
+    pyplot.show()
+
 if __name__ == "__main__":
     # Load the STL files and add the vectors to the plot
     # your_mesh = mesh.Mesh.from_file('meshes/z.stl')
@@ -123,4 +155,5 @@ if __name__ == "__main__":
     if VIEW_PLOT:
         plot_mesh(mesh)
     else:
-        analyze_edges(mesh)
+        bad_indices = analyze_edges(mesh)
+        plot_bad_edges(mesh, bad_indices)
