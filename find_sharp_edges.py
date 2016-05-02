@@ -9,13 +9,13 @@ from stl import mesh
 from mpl_toolkits import mplot3d
 from matplotlib import pyplot
 
-parser = argparse.ArgumentParser(description='Analyze a manifold mesh to see if it has acute edges.')
-parser.add_argument('-t', '--threshold', type=int, default=80, help='The degree in angles that all edges must be greater than (default=80 degrees).')
+parser = argparse.ArgumentParser(description='Analyze a manifold mesh to see if it has acute edges. Display offending edges.')
+parser.add_argument('-t', '--threshold', type=int, default=80, help='The degree in angles that all edges must be greater than (default=80 degrees, max=89 degrees)')
 parser.add_argument('-v', '--view', action="store_true", help='Show a plot of the model instead of analyzing it.')
 parser.add_argument('STL_FILE')
 args = parser.parse_args()
 
-ANGLE_THRESHOLD = args.threshold
+ANGLE_THRESHOLD = min(args.threshold, 89)
 VIEW_PLOT = args.view
 STL_FILE = args.STL_FILE
 
@@ -79,21 +79,34 @@ def build_edge_hash(mesh):
 
     return edge_hash
 
+def points_are_equal(p1, p2):
+    return p1[0]==p2[0] and p1[1]==p2[1] and p1[2]==p2[2]
+
 def analyze_edges(mesh):
     edge_hash = build_edge_hash(mesh)
 
     num_bad_edges = 0
     bad_indices = []
-    for values in edge_hash.values():
+    for edge, values in edge_hash.items():
         n1 = values[0][1]
         n2 = values[1][1]
+
+
         angle_between_normals = radians_to_degrees(angle_between(n1, n2))
         angle_of_edge = 180.0 - angle_between_normals
+        # Verify the angle is below the threshold.
         if angle_of_edge < ANGLE_THRESHOLD:
-            print ("{0:.2f} degree angle found! (Angle less than {1} degrees)  /  Triangle Indices: {2}, {3}".format(angle_of_edge, ANGLE_THRESHOLD, values[0][2], values[1][2]))
-            num_bad_edges += 1
-            bad_indices.append(values[0][2])
-            bad_indices.append(values[1][2])
+            # If it is below the threshold, also calculate whether it is
+            # concave or convex.
+            points = [values[1][0][0:3], values[1][0][3:6], values[1][0][6:9]]
+            for vertex in points:
+                if (not points_are_equal(vertex, edge[0]) and not points_are_equal(vertex, edge[1])):
+                    s2 = vertex - edge[0]
+            if np.dot(n1, s2) < 0:
+                print ("{0:.2f} degree angle found! (Angle less than {1} degrees)  /  Triangle Indices: {2}, {3}".format(angle_of_edge, ANGLE_THRESHOLD, values[0][2], values[1][2]))
+                num_bad_edges += 1
+                bad_indices.append(values[0][2])
+                bad_indices.append(values[1][2])
     if num_bad_edges > 0:
         print("")
         print("ERROR: {} edges are too sharp! (Are less than {} degrees)".format(num_bad_edges, ANGLE_THRESHOLD))
